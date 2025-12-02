@@ -1,0 +1,80 @@
+
+
+# python build artifacts
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+
+# package outputs
+build/
+dist/
+eggs/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+share/python-wheels/
+wheels/
+MANIFEST
+
+# coverage & testing
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.hypothesis/
+.cache/
+
+# type checking caches
+.mypy_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+
+# notebooks
+.ipynb_checkpoints/
+
+# checkpoints
+checkpoints/*
+
+# logs
+logs
+*.log
+
+# runs
+runs/*
+
+
+# __pycache__
+*/__pycache__/*
+__pycache__/
+
+
+# output
+outputs/*   
+
+
+# ides
+.idea
+.vscode
+.venv
+.cursor/
+venv/
+.venv/
+.envrc
+
+.DS_Store
+.env*
+.python-version
+
+config.env
+config.development.env
+config.production.env
+
+
+archive
+outputs
+runs
+
+.cursorignore

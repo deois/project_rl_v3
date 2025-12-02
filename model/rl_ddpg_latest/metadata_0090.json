@@ -1,0 +1,57 @@
+{
+  "episode": 90,
+  "save_time": 1764252509.39765,
+  "save_datetime": "2025-11-27 23:08:29",
+  "training_config": {
+    "episodes": 100,
+    "episodes_save": 10,
+    "episodes_resume": 0,
+    "batch_size": 128,
+    "hidden_dim": 256,
+    "actor_lr": 0.0003,
+    "critic_lr": 0.0003,
+    "critic_loss_type": "mse",
+    "window_size": 60,
+    "assets": [
+      "SPY",
+      "DGRO",
+      "SCHD",
+      "QQQ"
+    ],
+    "current_episode": 90,
+    "total_episodes": 100,
+    "task_id": "14072658",
+    "average_reward": 0.0,
+    "training_start_time": 1764244821.808055,
+    "selected_etfs": [
+      "SPY",
+      "DGRO",
+      "SCHD",
+      "QQQ"
+    ],
+    "etf_count": 4,
+    "max_grad_norm": 0.5,
+    "total_training_time_hours": 2.138903573950132,
+    "average_episode_time_seconds": 84.45439741375682,
+    "estimated_remaining_time_hours": 0.23459554837154675,
+    "completed_episodes_count": 91,
+    "training_efficiency_episodes_per_hour": 42.545162441306786
+  },
+  "model_info": {
+    "hidden_dim": 256,
+    "learning_rates": {
+      "actor_lr": 0.0003,
+      "critic_lr": 0.0003
+    },
+    "critic_loss_type": "mse",
+    "max_grad_norm": 0.5,
+    "batch_size": 128,
+    "window_size": 60,
+    "assets": [
+      "SPY",
+      "DGRO",
+      "SCHD",
+      "QQQ"
+    ]
+  }
+}
