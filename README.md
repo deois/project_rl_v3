@@ -327,6 +327,36 @@ pip install -r requirements.txt
 
 > **참고**: uv는 캐싱·격리 덕분에 더 빠르고 안정적이지만, 기존 `pip install -r requirements.txt`도 사용 가능합니다.
 
+**설정 파일 생성**:
+
+프로젝트 루트 디렉토리에 `config.env` 파일을 생성하고 다음 내용을 추가합니다:
+
+```bash
+# API Keys
+API_KEY_FRED=
+
+# Dash Application Settings
+DASH_DEBUG=true
+DASH_AUTO_RELOAD=true
+DASH_DEV_TOOLS_UI=true
+DASH_DEV_TOOLS_PROPS_CHECK=true
+DASH_HOST=0.0.0.0
+DASH_PORT=8050
+
+# Development Settings
+DASH_SERVE_DEV_BUNDLES=true
+DASH_HOT_RELOAD=true
+```
+
+**API 키 발급**:
+
+- **API_KEY_FRED**: [FRED (Federal Reserve Economic Data)](https://fred.stlouisfed.org/docs/api/api_key.html)에서 무료로 API 키를 발급받을 수 있습니다. FRED API 키는 시장 지표 데이터(VIX 등)를 가져오는 데 사용됩니다.
+  1. [FRED API 키 발급 페이지](https://fred.stlouisfed.org/docs/api/api_key.html)에 접속
+  2. 계정 생성 또는 로그인
+  3. API 키 발급 후 `config.env` 파일의 `API_KEY_FRED=` 뒤에 발급받은 키를 입력
+
+> **주의**: `config.env` 파일은 민감한 정보를 포함할 수 있으므로 Git에 커밋하지 않도록 주의하세요. 프로젝트의 `.gitignore` 파일에 이미 포함되어 있습니다.
+
 **VSCode Python 인터프리터 설정** (선택사항):
 
 1. VSCode 명령 팔레트 (`Cmd+Shift+P` 또는 `Ctrl+Shift+P`) 실행
