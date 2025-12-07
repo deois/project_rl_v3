@@ -4,6 +4,224 @@
 
 ## 📘 프로젝트 과제 지침 반영 내용
 
+### 0. 실행 방법
+
+![실행 및 재현 절차](images/pabe_about_7.png)
+
+본 프로젝트는 환경변수 기반 설정 시스템을 통해 개발 및 운영 환경을 구분하여 실행할 수 있습니다.
+
+#### 0.1. 환경 설정
+
+**uv 설치 및 가상환경 구성**:
+
+프로젝트는 [uv](https://docs.astral.sh/uv/)를 통해 Python 인터프리터와 의존성을 관리합니다.
+
+```bash
+# uv 설치 (macOS/Linux)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Homebrew 사용 시
+brew install uv
+
+# 프로젝트 루트에서 가상환경 생성
+uv venv .venv
+
+# 가상환경 활성화 (zsh/bash)
+source .venv/bin/activate
+```
+
+**의존성 설치**:
+
+```bash
+# requirements.txt 기반 설치
+uv pip install -r requirements.txt
+
+# 또는 기존 pip 사용
+pip install -r requirements.txt
+```
+
+> **참고**: uv는 캐싱·격리 덕분에 더 빠르고 안정적이지만, 기존 `pip install -r requirements.txt`도 사용 가능합니다.
+
+**설정 파일 생성**:
+
+프로젝트 루트 디렉토리에 `config.env` 파일을 생성하고 다음 내용을 추가합니다:
+
+```bash
+# API Keys
+API_KEY_FRED=
+
+# Dash Application Settings
+DASH_DEBUG=true
+DASH_AUTO_RELOAD=true
+DASH_DEV_TOOLS_UI=true
+DASH_DEV_TOOLS_PROPS_CHECK=true
+DASH_HOST=0.0.0.0
+DASH_PORT=8050
+
+# Development Settings
+DASH_SERVE_DEV_BUNDLES=true
+DASH_HOT_RELOAD=true
+```
+
+**API 키 발급**:
+
+- **API_KEY_FRED**: [FRED (Federal Reserve Economic Data)](https://fred.stlouisfed.org/docs/api/api_key.html)에서 무료로 API 키를 발급받을 수 있습니다. FRED API 키는 시장 지표 데이터(VIX 등)를 가져오는 데 사용됩니다.
+  1. [FRED API 키 발급 페이지](https://fred.stlouisfed.org/docs/api/api_key.html)에 접속
+  2. 계정 생성 또는 로그인
+  3. API 키 발급 후 `config.env` 파일의 `API_KEY_FRED=` 뒤에 발급받은 키를 입력
+
+> **주의**: `config.env` 파일은 민감한 정보를 포함할 수 있으므로 Git에 커밋하지 않도록 주의하세요. 프로젝트의 `.gitignore` 파일에 이미 포함되어 있습니다.
+
+**VSCode Python 인터프리터 설정** (선택사항):
+
+1. VSCode 명령 팔레트 (`Cmd+Shift+P` 또는 `Ctrl+Shift+P`) 실행
+2. `Python: Select Interpreter` 입력 후 선택
+3. `${workspaceFolder}/.venv/bin/python` 인터프리터를 선택
+4. `.vscode/settings.json`에 `"python.defaultInterpreterPath"`가 이미 지정되어 있어 최초 선택 후 자동 유지됩니다.
+
+#### 0.2. 애플리케이션 실행
+
+**환경변수 기반 설정 시스템**:
+
+프로젝트는 환경변수를 통해 자동 리로드 및 개발 도구를 제어할 수 있습니다.
+
+```bash
+# 개발 모드 (자동 리로드 활성화)
+python run_dev.py
+
+# 운영 모드 (자동 리로드 비활성화, 성능 최적화)
+python run_prod.py
+
+# 기본 실행
+python dash_interface_complete_refactored.py
+```
+
+**설정 파일별 실행**:
+
+```bash
+# 개발 환경 설정
+export DASH_CONFIG_FILE=config.development.env
+python dash_interface_complete_refactored.py
+
+# 운영 환경 설정
+export DASH_CONFIG_FILE=config.production.env
+python dash_interface_complete_refactored.py
+```
+
+**Auto-Reload 제어**:
+
+`config.env` 파일에서 자동 리로드 설정을 변경할 수 있습니다:
+
+```bash
+DASH_AUTO_RELOAD=true     # 자동 리로드 활성화
+DASH_AUTO_RELOAD=false    # 자동 리로드 비활성화
+```
+
+#### 0.3. 웹 브라우저 접속
+
+애플리케이션 실행 후 다음 주소로 접속합니다:
+
+- **로컬 접속**: <http://127.0.0.1:8050>
+- **네트워크 접속**: http://[로컬IP]:8050
+
+실행 시 현재 적용된 설정이 콘솔에 표시됩니다:
+
+```text
+🔧 DASH 애플리케이션 설정
+============================================================
+🌐 서버: 0.0.0.0:8050
+🐛 디버그 모드: ✅
+🔄 자동 리로드: ✅ / ❌
+🛠️ 개발 도구 UI: ✅
+📊 속성 검사: ✅
+🔥 핫 리로드: ✅
+📦 개발 번들 제공: ✅
+============================================================
+```
+
+#### 0.4. 학습된 모델 저장 및 다운로드
+
+**모델 저장 위치**:
+
+학습된 DDPG 모델은 다음 두 위치에 자동으로 저장됩니다:
+
+1. **작업 ID 기반 디렉토리**: `model/rl_ddpg_{task_id}/`
+   - 각 학습 작업마다 고유한 작업 ID로 구분
+   - 예: `model/rl_ddpg_14072658/`
+
+2. **최신 체크포인트 디렉토리**: `model/rl_ddpg_latest/`
+   - 가장 최근에 학습된 모델을 항상 유지
+   - 백테스트에서 기본적으로 사용되는 모델
+
+**저장되는 파일 형식**:
+
+각 모델 디렉토리에는 다음 파일들이 저장됩니다:
+
+- **체크포인트 파일** (`.pth`):
+  - `checkpoint_{episode:04d}.pth`: 특정 에피소드의 모델 상태
+  - `checkpoint_last.pth`: 가장 최근 에피소드의 모델 상태
+  - 포함 내용: Actor/Critic 메인 및 타겟 네트워크 상태, 옵티마이저 상태
+
+- **메타데이터 파일** (`.json`):
+  - `metadata_{episode:04d}.json`: 특정 에피소드의 학습 메타데이터
+  - `metadata_last.json`: 가장 최근 에피소드의 학습 메타데이터
+  - 포함 내용:
+    - 학습 설정: 하이퍼파라미터(학습률, 배치 크기, 은닉층 차원), ETF 조합, 윈도우 크기
+    - 학습 진행 상황: 현재 에피소드, 총 에피소드, 평균 보상
+    - 학습 시간 통계: 총 학습 시간, 평균 에피소드 시간, 예상 남은 시간, 학습 효율성
+    - 모델 정보: 모델 해시, 무결성 검증 결과
+
+**모델 폴더 접근 방법**:
+
+학습된 모델은 프로젝트 루트의 `model/` 디렉토리에서 확인할 수 있습니다:
+
+```text
+model/
+├── rl_ddpg_{task_id}/          # 작업별 모델 저장소
+│   ├── checkpoint_0000.pth
+│   ├── checkpoint_0010.pth
+│   ├── ...
+│   ├── checkpoint_last.pth
+│   ├── metadata_0000.json
+│   ├── metadata_0010.json
+│   ├── ...
+│   └── metadata_last.json
+└── rl_ddpg_latest/             # 최신 모델 (항상 최신 상태 유지)
+    ├── checkpoint_0000.pth
+    ├── checkpoint_0010.pth
+    ├── ...
+    ├── checkpoint_last.pth
+    ├── metadata_0000.json
+    ├── metadata_0010.json
+    ├── ...
+    └── metadata_last.json
+```
+
+**모델 다운로드**:
+
+학습된 모델을 다운로드하려면 `model/` 디렉토리의 해당 폴더를 직접 복사하거나 압축하여 사용할 수 있습니다:
+
+```bash
+# 특정 작업의 모델 다운로드 (압축)
+cd model
+tar -czf rl_ddpg_{task_id}.tar.gz rl_ddpg_{task_id}/
+
+# 최신 모델 다운로드 (압축)
+tar -czf rl_ddpg_latest.tar.gz rl_ddpg_latest/
+```
+
+**모델 로드 및 재사용**:
+
+백테스트 탭에서 저장된 모델을 선택하여 성과를 검증할 수 있습니다. 또한 Python 코드에서 직접 모델을 로드하여 사용할 수도 있습니다:
+
+```python
+from src.ddpg_algorithm.ddpg_agent import DDPGAgent
+
+# 모델 로드
+agent = DDPGAgent(...)
+agent.load_checkpoint("model/rl_ddpg_latest/", evaluate=True)
+```
+
 ### 1. 문제 정의 및 최적화 목표
 
 ![문제 정의 및 최적화 목표](images/pabe_about_1.png)
@@ -288,224 +506,6 @@
 **로그 및 메트릭 저장**:
 
 - 모든 로그는 통합 로그 파일(`logs/log_{mode}_unified_{timestamp}.log`)에 UTF-8 인코딩으로 저장되며, 학습/백테스트 중 발생하는 메트릭은 실시간으로 차트 데이터 구조에 추가된다. 체크포인트와 함께 저장되는 JSON 메타데이터에는 학습 설정, 성과 지표, 실행 시간 등이 포함되어 실험 추적과 재현성을 보장한다.
-
-### 6. 실행 방법
-
-![실행 및 재현 절차](images/pabe_about_7.png)
-
-본 프로젝트는 환경변수 기반 설정 시스템을 통해 개발 및 운영 환경을 구분하여 실행할 수 있습니다.
-
-#### 6.1. 환경 설정
-
-**uv 설치 및 가상환경 구성**:
-
-프로젝트는 [uv](https://docs.astral.sh/uv/)를 통해 Python 인터프리터와 의존성을 관리합니다.
-
-```bash
-# uv 설치 (macOS/Linux)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Homebrew 사용 시
-brew install uv
-
-# 프로젝트 루트에서 가상환경 생성
-uv venv .venv
-
-# 가상환경 활성화 (zsh/bash)
-source .venv/bin/activate
-```
-
-**의존성 설치**:
-
-```bash
-# requirements.txt 기반 설치
-uv pip install -r requirements.txt
-
-# 또는 기존 pip 사용
-pip install -r requirements.txt
-```
-
-> **참고**: uv는 캐싱·격리 덕분에 더 빠르고 안정적이지만, 기존 `pip install -r requirements.txt`도 사용 가능합니다.
-
-**설정 파일 생성**:
-
-프로젝트 루트 디렉토리에 `config.env` 파일을 생성하고 다음 내용을 추가합니다:
-
-```bash
-# API Keys
-API_KEY_FRED=
-
-# Dash Application Settings
-DASH_DEBUG=true
-DASH_AUTO_RELOAD=true
-DASH_DEV_TOOLS_UI=true
-DASH_DEV_TOOLS_PROPS_CHECK=true
-DASH_HOST=0.0.0.0
-DASH_PORT=8050
-
-# Development Settings
-DASH_SERVE_DEV_BUNDLES=true
-DASH_HOT_RELOAD=true
-```
-
-**API 키 발급**:
-
-- **API_KEY_FRED**: [FRED (Federal Reserve Economic Data)](https://fred.stlouisfed.org/docs/api/api_key.html)에서 무료로 API 키를 발급받을 수 있습니다. FRED API 키는 시장 지표 데이터(VIX 등)를 가져오는 데 사용됩니다.
-  1. [FRED API 키 발급 페이지](https://fred.stlouisfed.org/docs/api/api_key.html)에 접속
-  2. 계정 생성 또는 로그인
-  3. API 키 발급 후 `config.env` 파일의 `API_KEY_FRED=` 뒤에 발급받은 키를 입력
-
-> **주의**: `config.env` 파일은 민감한 정보를 포함할 수 있으므로 Git에 커밋하지 않도록 주의하세요. 프로젝트의 `.gitignore` 파일에 이미 포함되어 있습니다.
-
-**VSCode Python 인터프리터 설정** (선택사항):
-
-1. VSCode 명령 팔레트 (`Cmd+Shift+P` 또는 `Ctrl+Shift+P`) 실행
-2. `Python: Select Interpreter` 입력 후 선택
-3. `${workspaceFolder}/.venv/bin/python` 인터프리터를 선택
-4. `.vscode/settings.json`에 `"python.defaultInterpreterPath"`가 이미 지정되어 있어 최초 선택 후 자동 유지됩니다.
-
-#### 6.2. 애플리케이션 실행
-
-**환경변수 기반 설정 시스템**:
-
-프로젝트는 환경변수를 통해 자동 리로드 및 개발 도구를 제어할 수 있습니다.
-
-```bash
-# 개발 모드 (자동 리로드 활성화)
-python run_dev.py
-
-# 운영 모드 (자동 리로드 비활성화, 성능 최적화)
-python run_prod.py
-
-# 기본 실행
-python dash_interface_complete_refactored.py
-```
-
-**설정 파일별 실행**:
-
-```bash
-# 개발 환경 설정
-export DASH_CONFIG_FILE=config.development.env
-python dash_interface_complete_refactored.py
-
-# 운영 환경 설정
-export DASH_CONFIG_FILE=config.production.env
-python dash_interface_complete_refactored.py
-```
-
-**Auto-Reload 제어**:
-
-`config.env` 파일에서 자동 리로드 설정을 변경할 수 있습니다:
-
-```bash
-DASH_AUTO_RELOAD=true     # 자동 리로드 활성화
-DASH_AUTO_RELOAD=false    # 자동 리로드 비활성화
-```
-
-#### 6.3. 웹 브라우저 접속
-
-애플리케이션 실행 후 다음 주소로 접속합니다:
-
-- **로컬 접속**: <http://127.0.0.1:8050>
-- **네트워크 접속**: http://[로컬IP]:8050
-
-실행 시 현재 적용된 설정이 콘솔에 표시됩니다:
-
-```text
-🔧 DASH 애플리케이션 설정
-============================================================
-🌐 서버: 0.0.0.0:8050
-🐛 디버그 모드: ✅
-🔄 자동 리로드: ✅ / ❌
-🛠️ 개발 도구 UI: ✅
-📊 속성 검사: ✅
-🔥 핫 리로드: ✅
-📦 개발 번들 제공: ✅
-============================================================
-```
-
-#### 6.4. 학습된 모델 저장 및 다운로드
-
-**모델 저장 위치**:
-
-학습된 DDPG 모델은 다음 두 위치에 자동으로 저장됩니다:
-
-1. **작업 ID 기반 디렉토리**: `model/rl_ddpg_{task_id}/`
-   - 각 학습 작업마다 고유한 작업 ID로 구분
-   - 예: `model/rl_ddpg_14072658/`
-
-2. **최신 체크포인트 디렉토리**: `model/rl_ddpg_latest/`
-   - 가장 최근에 학습된 모델을 항상 유지
-   - 백테스트에서 기본적으로 사용되는 모델
-
-**저장되는 파일 형식**:
-
-각 모델 디렉토리에는 다음 파일들이 저장됩니다:
-
-- **체크포인트 파일** (`.pth`):
-  - `checkpoint_{episode:04d}.pth`: 특정 에피소드의 모델 상태
-  - `checkpoint_last.pth`: 가장 최근 에피소드의 모델 상태
-  - 포함 내용: Actor/Critic 메인 및 타겟 네트워크 상태, 옵티마이저 상태
-
-- **메타데이터 파일** (`.json`):
-  - `metadata_{episode:04d}.json`: 특정 에피소드의 학습 메타데이터
-  - `metadata_last.json`: 가장 최근 에피소드의 학습 메타데이터
-  - 포함 내용:
-    - 학습 설정: 하이퍼파라미터(학습률, 배치 크기, 은닉층 차원), ETF 조합, 윈도우 크기
-    - 학습 진행 상황: 현재 에피소드, 총 에피소드, 평균 보상
-    - 학습 시간 통계: 총 학습 시간, 평균 에피소드 시간, 예상 남은 시간, 학습 효율성
-    - 모델 정보: 모델 해시, 무결성 검증 결과
-
-**모델 폴더 접근 방법**:
-
-학습된 모델은 프로젝트 루트의 `model/` 디렉토리에서 확인할 수 있습니다:
-
-```text
-model/
-├── rl_ddpg_{task_id}/          # 작업별 모델 저장소
-│   ├── checkpoint_0000.pth
-│   ├── checkpoint_0010.pth
-│   ├── ...
-│   ├── checkpoint_last.pth
-│   ├── metadata_0000.json
-│   ├── metadata_0010.json
-│   ├── ...
-│   └── metadata_last.json
-└── rl_ddpg_latest/             # 최신 모델 (항상 최신 상태 유지)
-    ├── checkpoint_0000.pth
-    ├── checkpoint_0010.pth
-    ├── ...
-    ├── checkpoint_last.pth
-    ├── metadata_0000.json
-    ├── metadata_0010.json
-    ├── ...
-    └── metadata_last.json
-```
-
-**모델 다운로드**:
-
-학습된 모델을 다운로드하려면 `model/` 디렉토리의 해당 폴더를 직접 복사하거나 압축하여 사용할 수 있습니다:
-
-```bash
-# 특정 작업의 모델 다운로드 (압축)
-cd model
-tar -czf rl_ddpg_{task_id}.tar.gz rl_ddpg_{task_id}/
-
-# 최신 모델 다운로드 (압축)
-tar -czf rl_ddpg_latest.tar.gz rl_ddpg_latest/
-```
-
-**모델 로드 및 재사용**:
-
-백테스트 탭에서 저장된 모델을 선택하여 성과를 검증할 수 있습니다. 또한 Python 코드에서 직접 모델을 로드하여 사용할 수도 있습니다:
-
-```python
-from src.ddpg_algorithm.ddpg_agent import DDPGAgent
-
-# 모델 로드
-agent = DDPGAgent(...)
-agent.load_checkpoint("model/rl_ddpg_latest/", evaluate=True)
-```
 
 ### 7. 재현성 보장 메커니즘
 
